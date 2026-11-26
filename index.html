@@ -1,0 +1,153 @@
+<!DOCTYPE html>  <!--Seguimos esta estructura porque se carga en cascada-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Contraseñas - Prueba P3</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #1e1e1e;
+      border: 2px solid #ff6600;
+      border-radius: 14px;
+      padding: 25px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 0 18px rgba(255, 102, 0, 0.25);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      text-align: center;
+      color: #ff6600;
+    }
+    .badge {
+      background: #2a2a2a;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-bottom: 18px;
+      color: #cccccc;
+    }
+    .resultado {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 1rem;
+      font-family: monospace;
+      background: #121212;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 8px;
+    }
+    button {
+      background: #ff6600;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #e65c00;
+    }
+    .opcion {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+    }
+    .btn-generar {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Generador de Contraseñas</h1>
+    <div id="estado-entorno" class="badge">Comprobando entorno...</div>
+
+    <div class="resultado">
+      <input type="text" id="password" readonly>
+      <button onclick="copiar()">Copiar</button>
+    </div>
+
+    <div class="opcion">
+      <label for="longitud">Longitud: <span id="valor-longitud">16</span></label>
+      <input type="range" id="longitud" min="8" max="32" value="16" oninput="actualizarLongitud()">
+    </div>
+    <div class="opcion">
+      <label for="mayus">Mayúsculas (A-Z)</label>
+      <input type="checkbox" id="mayus" checked>
+    </div>
+    <div class="opcion">
+      <label for="numeros">Números (0-9)</label>
+      <input type="checkbox" id="numeros" checked>
+    </div>
+    <div class="opcion">
+      <label for="simbolos">Símbolos (!@#$)</label>
+      <input type="checkbox" id="simbolos" checked>
+    </div>
+
+    <button class="btn-generar" onclick="generar()">Generar nueva contraseña</button>
+  </div>
+
+  <script>
+    function actualizarLongitud() {
+      document.getElementById('valor-longitud').textContent = document.getElementById('longitud').value;
+    }
+
+    function generar() {
+      const longitud = parseInt(document.getElementById('longitud').value);
+      let caracteres = 'abcdefghijklmnopqrstuvwxyz';
+      if (document.getElementById('mayus').checked) caracteres += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      if (document.getElementById('numeros').checked) caracteres += '0123456789';
+      if (document.getElementById('simbolos').checked) caracteres += '!@#$%^&*()-_=+';
+
+      let pass = '';
+      for (let i = 0; i < longitud; i++) {
+        pass += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+      }
+      document.getElementById('password').value = pass;
+    }
+
+    function copiar() {
+      const campo = document.getElementById('password');
+      navigator.clipboard.writeText(campo.value);
+    }
+
+    async function comprobarEntorno() {
+      const badge = document.getElementById('estado-entorno');
+      try {
+        const res = await fetch('/api/status');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        badge.textContent = `Backend: ${data.entorno} | Host: ${data.host}`;
+      } catch {
+        badge.textContent = 'Entorno: Estático (HTML/JS en navegador)';
+      }
+    }
+
+    generar();
+    comprobarEntorno();
+  </script>
+</body>
+</html>
